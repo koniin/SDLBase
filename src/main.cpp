@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
     timer.fixed_dt = 1.0/60.0;
     timer.accumulator = 0;
 
-	SDL_Color ambientColor = { 43, 66, 49, 255 };
+	SDL_Color ambientColor = { 73, 96, 79, 255 };
 
 	Lights::add_light_layer(ambientColor, Lights::BlendMode::Multiply);
 	Lights::add_light("light", gw / 2, gh / 2);
