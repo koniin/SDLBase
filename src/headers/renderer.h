@@ -24,9 +24,9 @@ typedef struct {
 extern gfx renderer;
 
 struct Sprite {
-    //GPU_Image *image;
+    SDL_Texture *image;
     bool isValid() {
-        return false;//return image != NULL;
+        return image != NULL;
     }
 };
 

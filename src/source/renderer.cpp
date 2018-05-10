@@ -15,9 +15,28 @@ namespace Resources {
 	std::map<std::string, Sprite*> sprites;
 	std::map<std::string, Font*> fonts;
 
+	static SDL_Texture* loadTexture(const std::string &path) { 
+		//The final texture 
+		SDL_Texture* newTexture = NULL; 
+		//Load image at specified path 
+		SDL_Surface* loadedSurface = IMG_Load( path.c_str() ); 
+		if( loadedSurface == NULL ) { 
+			printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() ); 
+		} else { 
+			//Create texture from surface pixels 
+			newTexture = SDL_CreateTextureFromSurface(renderer.renderer, loadedSurface ); 
+			if( newTexture == NULL ) { 
+				printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() ); 
+			} 
+			//Get rid of old loaded surface 
+			SDL_FreeSurface( loadedSurface ); 
+		} 
+		return newTexture; 
+	}
+
     Sprite *loadSprite(const std::string& name, const std::string &filename) {
 		Sprite *s = new Sprite;
-    	//s->image = GPU_LoadImage(filename.c_str());
+    	s->image = loadTexture(filename);
 		sprites[name] = s;
 		return s;
 	}
@@ -67,13 +86,7 @@ namespace Resources {
 }
 
 void setWindowPosition(int x, int y) {
-	/*
-    GPU_Target* target = renderer.screen;
-	if (target == NULL || target->context == NULL)
-		return;
-
-	SDL_SetWindowPosition(SDL_GetWindowFromID(target->context->windowID), x, y);
-	*/
+	SDL_SetWindowPosition(renderer.sdl_window, x, y);
 }
 
 void centerWindow() {
@@ -81,13 +94,7 @@ void centerWindow() {
 }
 
 void setWindowTitle(const char* title) {
-	/*
-    //GPU_Target* target = renderer.screen;
-	if (target == NULL || target->context == NULL)
-		return;
-
-	SDL_SetWindowTitle(SDL_GetWindowFromID(target->context->windowID), title);
-	*/
+	SDL_SetWindowTitle(renderer.sdl_window, title);
 }
 
 void setWindowScale(float s) {
@@ -127,6 +134,17 @@ void drawFilledCircle(int x, int y, int radius, const SDL_Color &color) {
 }
 
 void drawSprite(Sprite *sprite, int x, int y) {
+	static int w;
+	static int h;
+	SDL_QueryTexture(sprite->image, NULL, NULL, &w, &h);
+
+	static SDL_Rect DestR;
+	DestR.x = x - (w / 2);
+ 	DestR.y = y - (h / 2);
+  	DestR.w = w;
+  	DestR.h = h;
+
+	SDL_RenderCopy(renderer.renderer, sprite->image, NULL, &DestR);
 	//GPU_Blit(sprite->image, src_rect, renderer.target, x, y);
 }
 
