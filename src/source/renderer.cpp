@@ -190,7 +190,7 @@ int initRenderer(const char *title, unsigned vw, unsigned vh, unsigned scale) {
 	// 	return -1;
 	// }
 
-	renderer.renderer = SDL_CreateRenderer(renderer.sdl_window, -1, SDL_RENDERER_ACCELERATED );
+	renderer.renderer = SDL_CreateRenderer(renderer.sdl_window, -1, SDL_RENDERER_ACCELERATED);
 
     renderer.clearColor = { 0, 0, 0, 255 };
 	SDL_SetRenderDrawColor(renderer.renderer, 0x00, 0x00, 0x00, 0xFF ); 
