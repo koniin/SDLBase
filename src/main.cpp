@@ -17,7 +17,9 @@ gameTimer timer;
 void windowEvent(const SDL_Event * event);
 
 static SDL_Event event;
-	
+
+static int number_of_sprites_to_render = 100;
+
 #ifdef _DEBUG
 	static bool showImGUI = true;
 #else
@@ -38,7 +40,11 @@ void input() {
         		break;             
 			} 
 			case SDL_KEYDOWN: {
-				if (event.key.keysym.sym == SDLK_ESCAPE) {
+				if (event.key.keysym.sym == SDLK_UP) {
+					number_of_sprites_to_render += 50;
+				} else if (event.key.keysym.sym == SDLK_DOWN) {
+					number_of_sprites_to_render -= 50;
+				} else if (event.key.keysym.sym == SDLK_ESCAPE) {
 					Engine::Exit();
 				} else if (event.key.keysym.sym == SDLK_F1) {
 					setWindowScale(1);
@@ -155,6 +161,7 @@ namespace Lights {
 	}
 }
 
+
 int main(int argc, char* argv[]) {
 	if(!initRenderer("TITLE", 640, 360, 2)) {
 		printf("init renderer failed");
@@ -165,6 +172,7 @@ int main(int argc, char* argv[]) {
 
 	auto light = Resources::loadSprite("light", "light.png");
 	auto rocks = Resources::loadSprite("rocks", "stones.png");
+	Resources::loadSprite("knight", "knight.png");
 	
 
 	// Initiate timer
@@ -185,7 +193,14 @@ int main(int argc, char* argv[]) {
 	// Lights::add_light("light", 200, 200, 1);
 
 	float my_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	
+
+#define FPS_INTERVAL 1.0 //seconds.
+
+	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
+	Uint32 fps_current; //the current FPS.
+	Uint32 fps_frames = 0; //frames passed since the last recorded fps.
+
+
     while (Engine::IsRunning()) {
 		timer.last = timer.now;
         timer.now = SDL_GetPerformanceCounter();
@@ -209,13 +224,26 @@ int main(int argc, char* argv[]) {
 		
 		drawSprite(rocks, gw / 2, gh / 2);
 
-		//GPU_SetBlendMode(light->image, GPU_BLEND_ADD);
+		for(int i = 0; i < number_of_sprites_to_render; i++) {
+			int x, y;
+			RNG::randomPoint(gw, gh, x, y);
+			drawSprite(Resources::getSprite("knight"), x, y);	
+		}
 
 		Lights::render_lights();
 
 		rendererDrawRenderTargetToScreen();
 		
 		rendererFlip();
+
+		fps_frames++;
+		if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL*1000)
+		{
+			fps_lasttime = SDL_GetTicks();
+			fps_current = fps_frames;
+			fps_frames = 0;
+			printf("\nFPS: %d, sprites: %d", fps_current, number_of_sprites_to_render);
+		}
 	}
 	
 	Lights::cleanup();
