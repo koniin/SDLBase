@@ -19,12 +19,8 @@ void windowEvent(const SDL_Event * event);
 static SDL_Event event;
 
 static int number_of_sprites_to_render = 100;
-
-#ifdef _DEBUG
-	static bool showImGUI = true;
-#else
-	static bool showImGUI = false;
-#endif
+static bool hitEffect = false;
+static bool render_lights = true;
 
 void input() {
 	Input::updateStates();
@@ -44,6 +40,8 @@ void input() {
 					number_of_sprites_to_render += 50;
 				} else if (event.key.keysym.sym == SDLK_DOWN) {
 					number_of_sprites_to_render -= 50;
+				} else if (event.key.keysym.sym == SDLK_h) {
+					hitEffect = !hitEffect;
 				} else if (event.key.keysym.sym == SDLK_ESCAPE) {
 					Engine::Exit();
 				} else if (event.key.keysym.sym == SDLK_F1) {
@@ -62,7 +60,8 @@ void input() {
 					setWindowScale(3);
 					toggleFullscreen(true);
 				} else if (event.key.keysym.sym == SDLK_F6) {
-					showImGUI = !showImGUI;
+					render_lights = !render_lights;
+					//showImGUI = !showImGUI;
 				}
 				break;
 			}
@@ -224,13 +223,30 @@ int main(int argc, char* argv[]) {
 		
 		drawSprite(rocks, gw / 2, gh / 2);
 
-		for(int i = 0; i < number_of_sprites_to_render; i++) {
-			int x, y;
-			RNG::randomPoint(gw, gh, x, y);
-			drawSprite(Resources::getSprite("knight"), x, y);	
-		}
+		// NOTE: EITHER MODIFY THE TEXTURE AND RENDER IT OR CREATE NEW TEXTURES (?)
 
-		Lights::render_lights();
+		// For hit effect set the color mod to 255 and render the sprite
+		if(hitEffect) {
+			SDL_SetTextureColorMod(Resources::getSprite("knight")->image, 255, 0, 0);
+		}
+		drawSprite(Resources::getSprite("knight"), gw / 2, gh / 2);
+		// After the sprite is rendered we reset the color mod to default values so other renders of that 
+		// sprite is normal 
+		SDL_SetTextureColorMod(Resources::getSprite("knight")->image, 255, 255, 255);
+
+		// This is how you fade something
+		SDL_SetTextureAlphaMod(Resources::getSprite("knight")->image, 100);
+		drawSprite(Resources::getSprite("knight"), gw / 2 + 100, gh / 2);
+		SDL_SetTextureAlphaMod(Resources::getSprite("knight")->image, 255);
+
+		// for(int i = 0; i < number_of_sprites_to_render; i++) {
+		// 	int x, y;
+		// 	RNG::randomPoint(gw, gh, x, y);
+		// 	drawSprite(Resources::getSprite("knight"), x, y);	
+		// }
+
+		if(render_lights)
+			Lights::render_lights();
 
 		rendererDrawRenderTargetToScreen();
 		
